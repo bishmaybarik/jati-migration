@@ -1,147 +1,227 @@
 # India Migration Patterns Dashboard
 
-An interactive web dashboard visualizing migration patterns across India at state and district levels. Built with Plotly Dash and deployed using AWS S3 for data storage.
+An interactive web-based visualization platform for analyzing internal migration patterns in India at state and district levels, with demographic stratification by caste, religion, and migration motivations.
 
-## Features
+## Overview
 
-- **Interactive Map Visualization**: View migration flows with directional arrows showing movement patterns
-- **Multiple Analysis Levels**: Switch between state-level and district-level analysis
-- **Demographic Filters**: Filter by caste category, religion, specific caste (jati), and migration reasons
-- **Real-time Updates**: Dynamic filtering with instant visualization updates
-- **Comprehensive Data**: Based on Consumer Pyramids Household Survey (CPHS) data from 2020-2024
+This dashboard provides a geospatial analysis framework for understanding migration flows within India, leveraging household survey data to visualize origin-destination patterns across multiple temporal and demographic dimensions.
 
-## Data Source
+## Dataset
 
-Migration patterns are based on reported responses from Consumer Pyramids Household Survey (CPHS) members, covering waves from September-December 2020 through September-December 2024.
+### Primary Data Source
 
-Geographic boundaries are sourced from Asher, S., Lunt, T., Matsuura, R., & Novosad, P. (2021). Development research at high geographic resolution: an analysis of night-lights, firms, and poverty in India using the SHRUG open data platform. *The World Bank Economic Review, 35*(4).
+**Consumer Pyramids Household Survey (CPHS)** - Centre for Monitoring Indian Economy (CMIE)
+- **Temporal Coverage**: September-December 2020 through September-December 2024
+- **Survey Design**: Longitudinal household panel survey with wave-based data collection
+- **Migration Variables**: Self-reported emigration and immigration status with origin and destination information
+- **Sample Size**: Nationally representative sample covering rural and urban households
+
+### Derived Variables
+
+The dashboard constructs migration flows by:
+1. **Unique Individual Identification**: Creating composite identifiers (`hh_id + mem_id`) to track distinct migrants
+2. **Origin-Destination Mapping**: Defining directional flows based on reported migration status
+   - Emigration: Current residence → Destination state/district
+   - Immigration: Source state/district → Current residence
+3. **Geographic Harmonization**: Mapping survey district codes to standardized administrative boundaries using fuzzy matching algorithms
+
+### Geographic Boundaries
+
+Administrative boundaries sourced from:
+> Asher, S., Lunt, T., Matsuura, R., & Novosad, P. (2021). *Development research at high geographic resolution: an analysis of night-lights, firms, and poverty in India using the SHRUG open data platform*. The World Bank Economic Review, 35(4). Oxford University Press.
+
+**Spatial Processing**:
+- Topology simplification using Douglas-Peucker algorithm
+  - State boundaries: tolerance = 0.05 degrees
+  - District boundaries: tolerance = 0.02 degrees
+- Centroid calculation for origin-destination line rendering
+
+## Methodology
+
+### Data Processing Pipeline
+
+1. **Data Loading & Merging**
+   - Parquet-based data storage for efficient columnar access
+   - Left-join merge with district mapping crosswalk
+   - Filter to migration records (`mem_status ∈ {'Emigrated', 'Immigrated'}`)
+
+2. **Aggregation Strategy**
+   - Group by origin-destination pairs at selected geographic level
+   - Count unique individuals using `nunique()` on composite identifiers
+   - Compute separate aggregations for each demographic filter combination
+
+3. **Spatial Visualization**
+   - **Flow Lines**: Origin-destination pairs rendered as great circle arcs
+   - **Line Width Encoding**: Logarithmic scale based on migrant counts
+     - `width = max(0.5, (log(count + 1) / log(max_count + 1)) × 8)`
+   - **Directional Indicators**: Triangle markers positioned at 80% of arc length
+   - **Interactive Points**: Centroid-based markers with aggregated inflow/outflow statistics
+
+### Filtering Hierarchy
+
+The dashboard implements cascading filters:
+1. **Migration Direction** (Emigration/Immigration)
+2. **Geographic Level** (State/District)
+3. **Demographic Breakdown** (Overall/Caste Category/Religion)
+4. **Specific Category Value** (conditional on breakdown selection)
+5. **Caste (Jati)** (conditional on caste category selection)
+6. **Migration Reason** (independent filter)
+
+## Technical Stack
+
+### Core Libraries
+
+| Library | Version | Purpose |
+|---------|---------|---------|
+| **Streamlit** | ≥1.28.0 | Web application framework and reactive UI |
+| **Pandas** | ≥2.0.0 | Data manipulation and aggregation |
+| **GeoPandas** | ≥0.13.0 | Geospatial data operations and GeoJSON handling |
+| **Plotly** | ≥5.14.0 | Interactive choropleth maps and scatter-geo visualizations |
+| **NumPy** | ≥1.24.0 | Numerical computations and array operations |
+| **PyArrow** | ≥12.0.0 | Parquet file format I/O |
+
+### Algorithms & Techniques
+
+#### Geometric Operations
+- **Topology Simplification**: Douglas-Peucker algorithm via GeoPandas `simplify()`
+- **Centroid Calculation**: Weighted geographic center computation for polygon geometries
+- **Great Circle Interpolation**: Linear interpolation in geographic coordinates for flow lines
+
+#### Data Aggregation
+- **GroupBy Operations**: Hierarchical grouping with `observed=True` for categorical optimization
+- **Unique Count Estimation**: Hash-based distinct value counting
+- **Lazy Evaluation**: Streamlit's `@st.cache_data` decorator for memoization
+
+#### Visualization Encoding
+- **Logarithmic Scaling**: Line width encoding using `np.log1p()` for right-skewed distributions
+- **Angular Transformation**: Arctangent-based arrow orientation
+  - `angle = arctan2(Δlon, Δlat) × 180/π`
+- **Hover Text Aggregation**: Dynamic HTML generation for multi-line tooltips
+
+### Performance Optimizations
+
+1. **Data Caching**: Streamlit's built-in caching mechanism loads data once per session
+2. **Geometry Simplification**: Pre-simplified boundaries reduce rendering overhead
+3. **Categorical Data Types**: Memory-efficient storage for string columns
+4. **Columnar Storage**: Parquet format enables selective column loading
 
 ## Installation
 
 ### Prerequisites
-
 - Python 3.11 or higher
 - pip package manager
 
 ### Setup
 
-1. Clone the repository:
 ```bash
+# Clone repository
 git clone https://github.com/bishmaybarik/jati-migration.git
 cd jati-migration
-```
 
-2. Create a virtual environment (recommended):
-```bash
+# Create virtual environment (recommended)
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
-```
 
-3. Install dependencies:
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-## Running Locally
+## Usage
 
-To run the dashboard on your local machine:
+### Local Development
 
 ```bash
-python app.py
+streamlit run streamlit_app.py
 ```
 
-Then open your browser and navigate to `http://localhost:8050`
+Access the dashboard at `http://localhost:8501`
 
-## Deployment Options
+### Deployment
 
-### Option 1: Render (Recommended - Free & Easy)
+The application is deployed on Streamlit Cloud with auto-deployment from the main branch.
 
-[Render](https://render.com) offers free hosting for web applications with automatic deployments from GitHub.
+**Configuration**:
+- Entry point: `streamlit_app.py`
+- Python version: 3.11.7 (specified in `runtime.txt`)
+- Theme customization: `.streamlit/config.toml`
 
-**Steps:**
-1. Push your code to GitHub
-2. Sign up at [render.com](https://render.com)
-3. Create a new "Web Service"
-4. Connect your GitHub repository
-5. Configure:
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `gunicorn app:server`
-   - **Environment**: Python 3
+### Data Storage
 
-### Option 2: Railway
+Data files are hosted on Amazon S3 (Asia Pacific - Mumbai region):
+- **Bucket**: `jati-data`
+- **Region**: `ap-south-1`
+- **Access**: Public read access via bucket policy
 
-[Railway](https://railway.app) provides a simple deployment platform with generous free tier.
-
-**Steps:**
-1. Sign up at [railway.app](https://railway.app)
-2. Create new project from GitHub repo
-3. Railway auto-detects Python and uses the Procfile
-4. Deploy!
-
-### Option 3: Heroku
-
-[Heroku](https://www.heroku.com) is a classic platform with easy deployment.
-
-**Steps:**
-1. Install Heroku CLI
-2. Login: `heroku login`
-3. Create app: `heroku create your-app-name`
-4. Deploy: `git push heroku main`
-
-### Option 4: PythonAnywhere
-
-[PythonAnywhere](https://www.pythonanywhere.com) offers easy Python app hosting.
-
-**Steps:**
-1. Sign up for free account
-2. Create new web app (Flask/Django, but works with Dash)
-3. Upload files or clone from GitHub
-4. Configure WSGI file to point to `app:server`
-
-### Option 5: Streamlit Cloud
-
-While this is a Dash app, you could convert it to Streamlit for free hosting at [streamlit.io/cloud](https://streamlit.io/cloud).
-
-## Environment Variables
-
-If you need to configure any environment variables (e.g., for authentication or custom settings), create a `.env` file:
-
+**S3 Paths**:
 ```
-PORT=8050
+https://jati-data.s3.ap-south-1.amazonaws.com/
+├── migration.parquet
+├── district_mapping.csv
+├── state_centroids.csv
+├── district_centroids.csv
+├── state_boundaries.geojson
+└── district_boundaries.geojson
 ```
 
 ## File Structure
 
 ```
 jati-migration/
-├── app.py                 # Main application file
-├── requirements.txt       # Python dependencies
-├── Procfile              # Process file for deployment
-├── runtime.txt           # Python version specification
-├── .gitignore           # Git ignore rules
-└── README.md            # This file
+├── streamlit_app.py          # Main application entry point
+├── requirements.txt          # Python dependencies
+├── runtime.txt              # Python version specification
+├── .streamlit/
+│   └── config.toml          # UI theme configuration
+├── .gitignore              # Git exclusion patterns
+└── README.md               # This file
 ```
 
-## Technology Stack
+## Features
 
-- **Frontend**: Plotly Dash
-- **Backend**: Flask (via Dash)
-- **Data Processing**: Pandas, GeoPandas
-- **Visualization**: Plotly
-- **Data Storage**: AWS S3
-- **Deployment**: Gunicorn
+### Interactive Controls
 
-## Contributing
+- **Migration Type Selection**: Toggle between emigration and immigration flows
+- **Multi-scale Analysis**: Switch between state-level and district-level granularity
+- **Demographic Stratification**: Filter by caste category, religion, or specific jati
+- **Reason-based Filtering**: Isolate migration flows by reported motivation
+- **Dynamic Hover Information**: Detailed inflow/outflow statistics on map interaction
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+### Visualization Components
+
+1. **Geographic Base Map**: Administrative boundaries with configurable simplification
+2. **Flow Network**: Directed edges with thickness encoding migration volume
+3. **Centroid Markers**: Interactive points displaying aggregated statistics
+4. **Dashboard Metrics**: Summary statistics (total migrants, flow count, active filters)
+5. **Information Panel**: Data provenance and methodology documentation
+
+## Data Limitations
+
+- **Self-reported Data**: Migration status based on household responses
+- **Temporal Granularity**: Wave-based observation (3-4 month windows)
+- **Geographic Specificity**: District-level precision subject to respondent knowledge
+- **Survey Coverage**: Representative sample, not census
+- **Attrition Bias**: Panel survey subject to household dropout
+
+## Citation
+
+If you use this dashboard or methodology in your research, please cite:
+
+```bibtex
+@software{barik2024migration,
+  author = {Barik, Bishmay},
+  title = {India Migration Patterns Dashboard},
+  year = {2024},
+  url = {https://github.com/bishmaybarik/jati-migration}
+}
+```
 
 ## License
 
-This project is open source and available for educational and research purposes.
+This project is available for educational and research purposes.
 
-## Contact
+## Author
 
-Created by Bishmay Barik
+**Bishmay Barik**
 
 ---
 
