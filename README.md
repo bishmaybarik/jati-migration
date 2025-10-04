@@ -11,7 +11,7 @@ This dashboard provides a geospatial analysis framework for understanding migrat
 ### Primary Data Source
 
 **Consumer Pyramids Household Survey (CPHS)** - Centre for Monitoring Indian Economy (CMIE)
-- **Temporal Coverage**: January 2022 through December 2024
+- **Temporal Coverage**: January 2023 through December 2024
 - **Survey Design**: Longitudinal household panel survey with wave-based data collection
 - **Migration Variables**: Self-reported emigration and immigration status with origin and destination information
 - **Sample Size**: Nationally representative sample covering rural and urban households
@@ -149,11 +149,11 @@ The application is configured for deployment on Render.
 ### Data Storage
 
 Data is stored using a hybrid approach:
-- **AWS S3**: Migration dataset (2022-2024)
-  - File: `migration_2022_2024.parquet` (5.58 MB)
+- **AWS S3**: Migration dataset (2023-2024)
+  - File: `migration_2023_2024.parquet` (3.73 MB)
   - Bucket: `jati-data`
   - Region: `ap-south-1`
-  - Memory footprint: ~37 MB when loaded
+  - Memory footprint: ~23 MB when loaded
 - **Local Storage**: Geographic reference files in `raw/` directory (all parquet format)
   - `district_mapping.parquet` (15 KB)
   - `state_centroids.parquet` (3.4 KB)
@@ -204,8 +204,8 @@ jati-migration/
 ## Data Limitations
 
 - **Self-reported Data**: Migration status based on household responses
-- **Temporal Coverage**: Limited to 2022-2024 period (earlier data excluded for memory efficiency)
-- **Temporal Granularity**: Wave-based observation (3-4 month windows)
+- **Temporal Coverage**: Limited to 2023-2024 period (earlier data excluded for memory efficiency)
+- **Temporal Granularity**: Wave-based observation (monthly)
 - **Geographic Specificity**: District-level precision subject to respondent knowledge
 - **Survey Coverage**: Representative sample, not census
 - **Attrition Bias**: Panel survey subject to household dropout

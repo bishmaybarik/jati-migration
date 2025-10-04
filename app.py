@@ -13,7 +13,7 @@ import numpy as np
 
 # Load data
 print("Loading data...")
-migration_df = pd.read_parquet('https://jati-data.s3.ap-south-1.amazonaws.com/migration_2022_2024.parquet')
+migration_df = pd.read_parquet('https://jati-data.s3.ap-south-1.amazonaws.com/migration_2023_2024.parquet')
 district_mapping = pd.read_parquet('raw/district_mapping.parquet')
 state_centroids = pd.read_parquet('raw/state_centroids.parquet')
 district_centroids = pd.read_parquet('raw/district_centroids.parquet')
@@ -680,7 +680,7 @@ def update_map(migration_status, level_type, breakdown_type, breakdown_value, ca
                 html.P([
                     html.Strong("Data Source: ", style={'color': '#2d3748'}),
                     html.Span("Migration patterns are based on reported responses from Consumer Pyramids Household Survey (CPHS) members. "
-                    "The data covers waves from January 2022 through December 2024. "
+                    "The data covers waves from January 2023 through December 2024. "
                     "During each survey wave, respondents were asked about emigration or immigration status, "
                     "from which origin and destination states and districts have been identified.",
                     style={'color': '#4a5568'})
