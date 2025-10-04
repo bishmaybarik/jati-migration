@@ -11,7 +11,7 @@ This dashboard provides a geospatial analysis framework for understanding migrat
 ### Primary Data Source
 
 **Consumer Pyramids Household Survey (CPHS)** - Centre for Monitoring Indian Economy (CMIE)
-- **Temporal Coverage**: September-December 2020 through September-December 2024
+- **Temporal Coverage**: January 2022 through December 2024
 - **Survey Design**: Longitudinal household panel survey with wave-based data collection
 - **Migration Variables**: Self-reported emigration and immigration status with origin and destination information
 - **Sample Size**: Nationally representative sample covering rural and urban households
@@ -149,32 +149,38 @@ The application is configured for deployment on Render.
 ### Data Storage
 
 Data is stored using a hybrid approach:
-- **AWS S3**: Large migration dataset (`migration.parquet`)
+- **AWS S3**: Migration dataset (2022-2024)
+  - File: `migration_2022_2024.parquet` (5.58 MB)
   - Bucket: `jati-data`
   - Region: `ap-south-1`
-- **Local Storage**: Geographic reference files in `raw/` directory
-  - `district_mapping.csv`
-  - `state_centroids.csv`
-  - `district_centroids.csv`
-  - `state_boundaries.geojson`
-  - `district_boundaries.geojson`
+  - Memory footprint: ~37 MB when loaded
+- **Local Storage**: Geographic reference files in `raw/` directory (all parquet format)
+  - `district_mapping.parquet` (15 KB)
+  - `state_centroids.parquet` (3.4 KB)
+  - `district_centroids.parquet` (18 KB)
+  - `state_boundaries.parquet` (8.4 MB)
+  - `district_boundaries.parquet` (29 MB)
 
 ## File Structure
 
 ```
 jati-migration/
-├── app.py                    # Main Dash application
-├── requirements.txt          # Python dependencies
-├── render.yaml              # Render deployment configuration
-├── raw/                     # Local geographic data files
-│   ├── district_mapping.csv
-│   ├── state_centroids.csv
-│   ├── district_centroids.csv
-│   ├── state_boundaries.geojson
-│   └── district_boundaries.geojson
-├── copy_data_files.py       # Utility script to populate raw/ folder
-├── .gitignore              # Git exclusion patterns
-└── README.md               # This file
+├── app.py                           # Main Dash application (REQUIRED for Render)
+├── requirements.txt                 # Python dependencies (REQUIRED for Render)
+├── render.yaml                      # Render deployment config (REQUIRED for Render)
+├── README.md                        # Documentation
+├── .gitignore                       # Git exclusion patterns
+├── raw/                             # Local geographic data files (REQUIRED for Render)
+│   ├── district_mapping.parquet
+│   ├── state_centroids.parquet
+│   ├── district_centroids.parquet
+│   ├── state_boundaries.parquet
+│   └── district_boundaries.parquet
+└── b/                               # Build scripts (not needed for deployment)
+    ├── check_memory.py              # Memory usage estimation
+    ├── convert_parq.py              # CSV/GeoJSON to Parquet converter
+    ├── filter_migration_data.py     # Initial filtering script
+    └── filter_migration_optimized.py # Optimized filtering script
 ```
 
 ## Features
@@ -198,6 +204,7 @@ jati-migration/
 ## Data Limitations
 
 - **Self-reported Data**: Migration status based on household responses
+- **Temporal Coverage**: Limited to 2022-2024 period (earlier data excluded for memory efficiency)
 - **Temporal Granularity**: Wave-based observation (3-4 month windows)
 - **Geographic Specificity**: District-level precision subject to respondent knowledge
 - **Survey Coverage**: Representative sample, not census
