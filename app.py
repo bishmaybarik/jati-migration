@@ -13,7 +13,7 @@ import numpy as np
 
 # Load data
 print("Loading data...")
-migration_df = pd.read_parquet('https://jati-data.s3.ap-south-1.amazonaws.com/migration_2024.parquet')
+migration_df = pd.read_parquet('raw/migration_2024.parquet')
 district_mapping = pd.read_parquet('raw/district_mapping.parquet')
 state_centroids = pd.read_parquet('raw/state_centroids.parquet')
 district_centroids = pd.read_parquet('raw/district_centroids.parquet')

@@ -148,18 +148,17 @@ The application is configured for deployment on Render.
 
 ### Data Storage
 
-Data is stored using a hybrid approach:
-- **AWS S3**: Migration dataset (2024 only)
-  - File: `migration_2024.parquet` (1.45 MB)
-  - Bucket: `jati-data`
-  - Region: `ap-south-1`
-  - Memory footprint: ~10 MB when loaded
-- **Local Storage**: Geographic reference files in `raw/` directory (all parquet format, pre-simplified)
+All data files are stored locally in the `raw/` directory (all parquet format, optimized for memory efficiency):
+- **Migration data**: `migration_2024.parquet` (1.45 MB, loads as ~10 MB in memory)
+- **Geographic boundaries** (pre-simplified for performance):
+  - `state_boundaries.parquet` (321 KB, simplified tolerance=0.15)
+  - `district_boundaries.parquet` (196 KB, simplified tolerance=0.08)
+- **Reference data**:
   - `district_mapping.parquet` (15 KB)
   - `state_centroids.parquet` (3.4 KB)
   - `district_centroids.parquet` (18 KB)
-  - `state_boundaries.parquet` (321 KB, simplified)
-  - `district_boundaries.parquet` (196 KB, simplified)
+
+**Total repository data size**: ~2 MB (optimized for Render free tier deployment)
 
 ## File Structure
 
