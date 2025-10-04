@@ -11,7 +11,7 @@ This dashboard provides a geospatial analysis framework for understanding migrat
 ### Primary Data Source
 
 **Consumer Pyramids Household Survey (CPHS)** - Centre for Monitoring Indian Economy (CMIE)
-- **Temporal Coverage**: January 2023 through December 2024
+- **Temporal Coverage**: 2024 (Jan-Sep available in data)
 - **Survey Design**: Longitudinal household panel survey with wave-based data collection
 - **Migration Variables**: Self-reported emigration and immigration status with origin and destination information
 - **Sample Size**: Nationally representative sample covering rural and urban households
@@ -149,17 +149,17 @@ The application is configured for deployment on Render.
 ### Data Storage
 
 Data is stored using a hybrid approach:
-- **AWS S3**: Migration dataset (2023-2024)
-  - File: `migration_2023_2024.parquet` (3.73 MB)
+- **AWS S3**: Migration dataset (2024 only)
+  - File: `migration_2024.parquet` (1.45 MB)
   - Bucket: `jati-data`
   - Region: `ap-south-1`
-  - Memory footprint: ~23 MB when loaded
-- **Local Storage**: Geographic reference files in `raw/` directory (all parquet format)
+  - Memory footprint: ~10 MB when loaded
+- **Local Storage**: Geographic reference files in `raw/` directory (all parquet format, pre-simplified)
   - `district_mapping.parquet` (15 KB)
   - `state_centroids.parquet` (3.4 KB)
   - `district_centroids.parquet` (18 KB)
-  - `state_boundaries.parquet` (8.4 MB)
-  - `district_boundaries.parquet` (29 MB)
+  - `state_boundaries.parquet` (321 KB, simplified)
+  - `district_boundaries.parquet` (196 KB, simplified)
 
 ## File Structure
 
@@ -204,8 +204,9 @@ jati-migration/
 ## Data Limitations
 
 - **Self-reported Data**: Migration status based on household responses
-- **Temporal Coverage**: Limited to 2023-2024 period (earlier data excluded for memory efficiency)
-- **Temporal Granularity**: Wave-based observation (monthly)
+- **Temporal Coverage**: Limited to 2024 only (earlier data excluded for memory efficiency on free deployment tier)
+- **Temporal Granularity**: Wave-based observation (monthly snapshots)
+- **Geographic Simplification**: Boundary geometries simplified for memory efficiency (may affect visual precision at high zoom)
 - **Geographic Specificity**: District-level precision subject to respondent knowledge
 - **Survey Coverage**: Representative sample, not census
 - **Attrition Bias**: Panel survey subject to household dropout
