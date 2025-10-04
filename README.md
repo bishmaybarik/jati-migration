@@ -73,12 +73,13 @@ The dashboard implements cascading filters:
 
 | Library | Version | Purpose |
 |---------|---------|---------|
-| **Streamlit** | ≥1.28.0 | Web application framework and reactive UI |
+| **Dash** | ≥2.14.0 | Web application framework and reactive UI |
 | **Pandas** | ≥2.0.0 | Data manipulation and aggregation |
 | **GeoPandas** | ≥0.13.0 | Geospatial data operations and GeoJSON handling |
 | **Plotly** | ≥5.14.0 | Interactive choropleth maps and scatter-geo visualizations |
 | **NumPy** | ≥1.24.0 | Numerical computations and array operations |
 | **PyArrow** | ≥12.0.0 | Parquet file format I/O |
+| **Gunicorn** | ≥21.2.0 | WSGI HTTP server for deployment |
 
 ### Algorithms & Techniques
 
@@ -90,7 +91,7 @@ The dashboard implements cascading filters:
 #### Data Aggregation
 - **GroupBy Operations**: Hierarchical grouping with `observed=True` for categorical optimization
 - **Unique Count Estimation**: Hash-based distinct value counting
-- **Lazy Evaluation**: Streamlit's `@st.cache_data` decorator for memoization
+- **Callback-based Reactivity**: Dash callbacks for efficient state management
 
 #### Visualization Encoding
 - **Logarithmic Scaling**: Line width encoding using `np.log1p()` for right-skewed distributions
@@ -100,7 +101,7 @@ The dashboard implements cascading filters:
 
 ### Performance Optimizations
 
-1. **Data Caching**: Streamlit's built-in caching mechanism loads data once per session
+1. **Data Loading**: Efficient parquet loading with hybrid storage (AWS S3 + local files)
 2. **Geometry Simplification**: Pre-simplified boundaries reduce rendering overhead
 3. **Categorical Data Types**: Memory-efficient storage for string columns
 4. **Columnar Storage**: Parquet format enables selective column loading
@@ -131,47 +132,47 @@ pip install -r requirements.txt
 ### Local Development
 
 ```bash
-streamlit run streamlit_app.py
+python app.py
 ```
 
-Access the dashboard at `http://localhost:8501`
+Access the dashboard at `http://localhost:8050`
 
 ### Deployment
 
-The application is deployed on Streamlit Cloud with auto-deployment from the main branch.
+The application is configured for deployment on Render.
 
 **Configuration**:
-- Entry point: `streamlit_app.py`
-- Python version: 3.11.7 (specified in `runtime.txt`)
-- Theme customization: `.streamlit/config.toml`
+- Entry point: `app.py`
+- WSGI server: Gunicorn
+- Deployment config: `render.yaml`
 
 ### Data Storage
 
-Data files are hosted on Amazon S3 (Asia Pacific - Mumbai region):
-- **Bucket**: `jati-data`
-- **Region**: `ap-south-1`
-- **Access**: Public read access via bucket policy
-
-**S3 Paths**:
-```
-https://jati-data.s3.ap-south-1.amazonaws.com/
-├── migration.parquet
-├── district_mapping.csv
-├── state_centroids.csv
-├── district_centroids.csv
-├── state_boundaries.geojson
-└── district_boundaries.geojson
-```
+Data is stored using a hybrid approach:
+- **AWS S3**: Large migration dataset (`migration.parquet`)
+  - Bucket: `jati-data`
+  - Region: `ap-south-1`
+- **Local Storage**: Geographic reference files in `raw/` directory
+  - `district_mapping.csv`
+  - `state_centroids.csv`
+  - `district_centroids.csv`
+  - `state_boundaries.geojson`
+  - `district_boundaries.geojson`
 
 ## File Structure
 
 ```
 jati-migration/
-├── streamlit_app.py          # Main application entry point
+├── app.py                    # Main Dash application
 ├── requirements.txt          # Python dependencies
-├── runtime.txt              # Python version specification
-├── .streamlit/
-│   └── config.toml          # UI theme configuration
+├── render.yaml              # Render deployment configuration
+├── raw/                     # Local geographic data files
+│   ├── district_mapping.csv
+│   ├── state_centroids.csv
+│   ├── district_centroids.csv
+│   ├── state_boundaries.geojson
+│   └── district_boundaries.geojson
+├── copy_data_files.py       # Utility script to populate raw/ folder
 ├── .gitignore              # Git exclusion patterns
 └── README.md               # This file
 ```

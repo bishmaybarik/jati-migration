@@ -11,16 +11,16 @@ from dash import Dash, dcc, html, Input, Output
 import json
 import numpy as np
 
-# Load data from AWS S3
-print("Loading data from AWS S3...")
+# Load data
+print("Loading data...")
 migration_df = pd.read_parquet('https://jati-data.s3.ap-south-1.amazonaws.com/migration.parquet')
-district_mapping = pd.read_csv('https://jati-data.s3.ap-south-1.amazonaws.com/district_mapping.csv')
-state_centroids = pd.read_csv('https://jati-data.s3.ap-south-1.amazonaws.com/state_centroids.csv')
-district_centroids = pd.read_csv('https://jati-data.s3.ap-south-1.amazonaws.com/district_centroids.csv')
+district_mapping = pd.read_parquet('raw/district_mapping.parquet')
+state_centroids = pd.read_parquet('raw/state_centroids.parquet')
+district_centroids = pd.read_parquet('raw/district_centroids.parquet')
 
 # Load boundaries
-state_gdf = gpd.read_file('https://jati-data.s3.ap-south-1.amazonaws.com/state_boundaries.geojson')
-district_gdf = gpd.read_file('https://jati-data.s3.ap-south-1.amazonaws.com/district_boundaries.geojson')
+state_gdf = gpd.read_parquet('raw/state_boundaries.parquet')
+district_gdf = gpd.read_parquet('raw/district_boundaries.parquet')
 
 # Simplify for faster rendering
 state_gdf['geometry'] = state_gdf.simplify(tolerance=0.05, preserve_topology=True)
