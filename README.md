@@ -4,14 +4,14 @@ An interactive web-based visualization platform for analyzing internal migration
 
 ## Overview
 
-This dashboard provides a geospatial analysis framework for understanding migration flows within India, leveraging household survey data to visualize origin-destination patterns across multiple temporal and demographic dimensions.
+This dashboard provides a geospatial analysis framework for understanding migration flows within India, leveraging household survey data to visualize origin-destination patterns across multiple temporal and demographic dimensions. The dashboard is designed to run locally on your machine, requiring no cloud deployment or external hosting.
 
 ## Dataset
 
 ### Primary Data Source
 
 **Consumer Pyramids Household Survey (CPHS)** - Centre for Monitoring Indian Economy (CMIE)
-- **Temporal Coverage**: 2024 (Jan-Sep available in data)
+- **Temporal Coverage**: September-December 2020 through September-December 2024
 - **Survey Design**: Longitudinal household panel survey with wave-based data collection
 - **Migration Variables**: Self-reported emigration and immigration status with origin and destination information
 - **Sample Size**: Nationally representative sample covering rural and urban households
@@ -79,7 +79,6 @@ The dashboard implements cascading filters:
 | **Plotly** | ≥5.14.0 | Interactive choropleth maps and scatter-geo visualizations |
 | **NumPy** | ≥1.24.0 | Numerical computations and array operations |
 | **PyArrow** | ≥12.0.0 | Parquet file format I/O |
-| **Gunicorn** | ≥21.2.0 | WSGI HTTP server for deployment |
 
 ### Algorithms & Techniques
 
@@ -101,86 +100,90 @@ The dashboard implements cascading filters:
 
 ### Performance Optimizations
 
-1. **Data Loading**: Efficient parquet loading with hybrid storage (AWS S3 + local files)
+1. **Data Loading**: Efficient parquet loading from local storage
 2. **Geometry Simplification**: Pre-simplified boundaries reduce rendering overhead
 3. **Categorical Data Types**: Memory-efficient storage for string columns
 4. **Columnar Storage**: Parquet format enables selective column loading
 
-## Installation
+## Installation and Usage
 
 ### Prerequisites
-- Python 3.11 or higher
+- Python 3.8 or higher
 - pip package manager
+- Git
 
-### Setup
+### Quick Start
 
-```bash
-# Clone repository
-git clone https://github.com/bishmaybarik/jati-migration.git
-cd jati-migration
+Follow these steps to clone the repository and run the dashboard locally:
 
-# Create virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/bishmaybarik/jati-migration.git
+   cd jati-migration
+   ```
 
-# Install dependencies
-pip install -r requirements.txt
-```
+2. **Create a virtual environment (recommended)**
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
 
-## Usage
+3. **Install dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-### Local Development
+4. **Run the dashboard**
+   ```bash
+   python migration.py
+   ```
 
-```bash
-python app.py
-```
+5. **Access the dashboard**
 
-Access the dashboard at `http://localhost:8050`
+   Open your web browser and navigate to: `http://localhost:8050`
 
-### Deployment
+   The dashboard will automatically load all data files from the `raw/` directory and start the interactive visualization.
 
-The application is configured for deployment on Render.
+6. **Stop the dashboard**
 
-**Configuration**:
-- Entry point: `app.py`
-- WSGI server: Gunicorn
-- Deployment config: `render.yaml`
+   Press `Ctrl+C` in the terminal to stop the server.
 
-### Data Storage
+### Data Files
 
-All data files are stored locally in the `raw/` directory (all parquet format, optimized for memory efficiency):
-- **Migration data**: `migration_2024.parquet` (1.45 MB, loads as ~10 MB in memory)
+All data files are stored locally in the `raw/` directory in Parquet format for optimal performance:
+
+- **Migration data**: `migration_2024.parquet` - Complete migration records (2020-2024)
 - **Geographic boundaries** (pre-simplified for performance):
-  - `state_boundaries.parquet` (321 KB, simplified tolerance=0.15)
-  - `district_boundaries.parquet` (196 KB, simplified tolerance=0.08)
+  - `state_boundaries.parquet` - State-level administrative boundaries (simplified tolerance=0.05)
+  - `district_boundaries.parquet` - District-level administrative boundaries (simplified tolerance=0.02)
 - **Reference data**:
-  - `district_mapping.parquet` (15 KB)
-  - `state_centroids.parquet` (3.4 KB)
-  - `district_centroids.parquet` (18 KB)
+  - `district_mapping.parquet` - District name harmonization mapping
+  - `state_centroids.parquet` - State geographic centroids for flow visualization
+  - `district_centroids.parquet` - District geographic centroids for flow visualization
 
-**Total repository data size**: ~2 MB (optimized for Render free tier deployment)
+**Note**: All data files are included in the repository. No additional downloads or cloud storage setup is required.
 
 ## File Structure
 
 ```
 jati-migration/
-├── app.py                           # Main Dash application (REQUIRED for Render)
-├── requirements.txt                 # Python dependencies (REQUIRED for Render)
-├── render.yaml                      # Render deployment config (REQUIRED for Render)
-├── README.md                        # Documentation
+├── migration.py                     # Main Dash application - run this to start the dashboard
+├── requirements.txt                 # Python dependencies
+├── README.md                        # Documentation (this file)
 ├── .gitignore                       # Git exclusion patterns
-├── raw/                             # Local geographic data files (REQUIRED for Render)
-│   ├── district_mapping.parquet
-│   ├── state_centroids.parquet
-│   ├── district_centroids.parquet
-│   ├── state_boundaries.parquet
-│   └── district_boundaries.parquet
-└── b/                               # Build scripts (not needed for deployment)
-    ├── check_memory.py              # Memory usage estimation
-    ├── convert_parq.py              # CSV/GeoJSON to Parquet converter
-    ├── filter_migration_data.py     # Initial filtering script
-    └── filter_migration_optimized.py # Optimized filtering script
+├── raw/                             # Data files directory (all files included in repo)
+│   ├── migration_2024.parquet       # Migration records (2020-2024)
+│   ├── district_mapping.parquet     # District name mapping
+│   ├── state_centroids.parquet      # State geographic centers
+│   ├── district_centroids.parquet   # District geographic centers
+│   ├── state_boundaries.parquet     # State administrative boundaries
+│   └── district_boundaries.parquet  # District administrative boundaries
+├── b/                               # Build/conversion scripts (optional, for reference)
+│   └── convert_to_parquet.py        # Script used to create parquet files from source data
+└── e/                               # Exploratory analysis scripts (optional, for reference)
 ```
+
+**Important**: Only `migration.py`, `requirements.txt`, and the `raw/` directory are required to run the dashboard.
 
 ## Features
 
@@ -203,9 +206,9 @@ jati-migration/
 ## Data Limitations
 
 - **Self-reported Data**: Migration status based on household responses
-- **Temporal Coverage**: Limited to 2024 only (earlier data excluded for memory efficiency on free deployment tier)
-- **Temporal Granularity**: Wave-based observation (monthly snapshots)
-- **Geographic Simplification**: Boundary geometries simplified for memory efficiency (may affect visual precision at high zoom)
+- **Temporal Coverage**: September-December 2020 through September-December 2024
+- **Temporal Granularity**: Wave-based observation (monthly/quarterly snapshots)
+- **Geographic Simplification**: Boundary geometries simplified for performance (may affect visual precision at high zoom)
 - **Geographic Specificity**: District-level precision subject to respondent knowledge
 - **Survey Coverage**: Representative sample, not census
 - **Attrition Bias**: Panel survey subject to household dropout
