@@ -10,17 +10,21 @@ import plotly.graph_objects as go
 from dash import Dash, dcc, html, Input, Output
 import json
 import numpy as np
+from pathlib import Path
+
+# Define data directory
+DATA_DIR = Path(__file__).parent / 'raw'
 
 # Load data
 print("Loading data...")
-migration_df = pd.read_parquet('raw/migration_2024.parquet')
-district_mapping = pd.read_parquet('raw/district_mapping.parquet')
-state_centroids = pd.read_parquet('raw/state_centroids.parquet')
-district_centroids = pd.read_parquet('raw/district_centroids.parquet')
+migration_df = pd.read_parquet(DATA_DIR / 'migration_2024.parquet')
+district_mapping = pd.read_parquet(DATA_DIR / 'district_mapping.parquet')
+state_centroids = pd.read_parquet(DATA_DIR / 'state_centroids.parquet')
+district_centroids = pd.read_parquet(DATA_DIR / 'district_centroids.parquet')
 
 # Load boundaries (already pre-simplified for memory efficiency)
-state_gdf = gpd.read_parquet('raw/state_boundaries.parquet')
-district_gdf = gpd.read_parquet('raw/district_boundaries.parquet')
+state_gdf = gpd.read_parquet(DATA_DIR / 'state_boundaries.parquet')
+district_gdf = gpd.read_parquet(DATA_DIR / 'district_boundaries.parquet')
 
 # Merge migration data with district mapping
 migration_df = migration_df.merge(
