@@ -12,7 +12,7 @@ This dashboard provides a geospatial analysis framework for understanding migrat
 
 **Consumer Pyramids Household Survey (CPHS)** - Centre for Monitoring Indian Economy (CMIE)
 - **Temporal Coverage**: September-December 2020 through September-December 2024
-- **Survey Design**: Longitudinal household panel survey with wave-based data collection
+- **Survey Design**: Longitudinal member panel survey with wave-based data collection
 - **Migration Variables**: Self-reported emigration and immigration status with origin and destination information
 - **Sample Size**: Nationally representative sample covering rural and urban households
 
@@ -122,7 +122,7 @@ Follow these steps to clone the repository and run the dashboard locally:
    cd jati-migration
    ```
 
-2. **Create a virtual environment (recommended)**
+2. **Create a virtual environment (optional)**
    ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
@@ -205,13 +205,13 @@ jati-migration/
 
 ## Data Limitations
 
-- **Self-reported Data**: Migration status based on household responses
+- **Self-reported Data**: Migration status based on member responses
 - **Temporal Coverage**: September-December 2020 through September-December 2024
 - **Temporal Granularity**: Wave-based observation (monthly/quarterly snapshots)
 - **Geographic Simplification**: Boundary geometries simplified for performance (may affect visual precision at high zoom)
 - **Geographic Specificity**: District-level precision subject to respondent knowledge
 - **Survey Coverage**: Representative sample, not census
-- **Attrition Bias**: Panel survey subject to household dropout
+- **Attrition Bias**: Panel survey subject to member dropout
 
 ## Citation
 
